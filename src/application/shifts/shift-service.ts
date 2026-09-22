@@ -1,7 +1,5 @@
 import type { Shift } from "../../domain/shift/shift";
-import {
-  calculateShiftDurationMinutes,
-} from "../../domain/shift/shift-duration";
+import {validateShift} from "../../domain/shift/shift-validation";
 import { createId } from "../../shared/id";
 import { nowIso } from "../../shared/time";
 import type { ShiftRepository } from "../../infrastructure/repositories/shift-repository";
@@ -33,8 +31,7 @@ export class ShiftService {
       updatedAt: now,
     };
 
-    // Validate the shift before storing it.
-    calculateShiftDurationMinutes(shift);
+    validateShift(shift);
 
     await this.shiftRepository.add(shift);
 
@@ -44,8 +41,7 @@ export class ShiftService {
   async updateShift(
     shift: Shift,
   ): Promise<void> {
-    // Validate the shift before storing it.
-    calculateShiftDurationMinutes(shift);
+    validateShift(shift);
 
     const updatedShift: Shift = {
       ...shift,

@@ -63,4 +63,33 @@ describe("Monthly hours", () => {
 
     expect(result).toBe(8.5 * 60);
   });
+
+  it("includes a shift that starts in the previous month but continues into the current month", () => {
+  const shifts: Shift[] = [
+    {
+      id: "overnight",
+      personId: "me",
+      workLocationId: "tv2",
+
+      startAt:
+        "2026-08-31T23:00",
+
+      endAt:
+        "2026-09-01T03:00",
+
+      createdAt: "",
+      updatedAt: "",
+    },
+  ];
+
+  const result =
+    calculateMonthlyMinutes(
+      shifts,
+      "me",
+      2026,
+      9,
+    );
+
+  expect(result).toBe(3 * 60);
+});
 });

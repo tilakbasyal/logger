@@ -12,7 +12,7 @@ export interface ShiftRepository {
     personId: string,
     from: string,
     to: string,
-  ): Promise<Shift[]>;
+    ): Promise<Shift[]>;
 }
 
 export class DexieShiftRepository
@@ -50,18 +50,39 @@ export class DexieShiftRepository
   }
 
   async getByPersonAndDateRange(
-    personId: string,
-    from: string,
-    to: string,
-  ): Promise<Shift[]> {
-    return db.shifts
-      .where("[personId+startAt]")
-      .between(
-        [personId, from],
-        [personId, to],
-        true,
-        false,
-      )
-      .toArray();
-  }
+  personId: string,
+  from: string,
+  to: string,
+): Promise<Shift[]> {
+  const shifts = await db.shifts
+    .where("personId")
+    .equals(personId)
+    .toArray();
+
+  const rangeStart = new Date(from);
+  const rangeEnd = new Date(to);
+
+  return shifts.filter((shift) => {
+    const shiftStart = new Date(
+      shift.startAt,
+    );
+
+    const shiftEnd = new Date(
+      shift.endAt,
+    );
+
+    /*
+     * Two time intervals overlap when:
+     *
+     * shiftStart < rangeEnd
+     * AND
+     * shiftEnd > rangeStart
+     */
+
+    return (
+      shiftStart < rangeEnd &&
+      shiftEnd > rangeStart
+    );
+  });
+}
 }

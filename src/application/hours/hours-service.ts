@@ -20,38 +20,68 @@ export class HoursService {
     }
 
   async getMonthlyMinutes(
-    personId: string,
-    year: number,
-    month: number,
-  ): Promise<number> {
-    const shifts =
-      await this.shiftRepository.getByPerson(
+  personId: string,
+  year: number,
+  month: number,
+): Promise<number> {
+  const monthStart = new Date(
+    year,
+    month - 1,
+    1,
+  );
+
+  const nextMonthStart = new Date(
+    year,
+    month,
+    1,
+  );
+
+  const shifts =
+    await this.shiftRepository
+      .getByPersonAndDateRange(
         personId,
+        monthStart.toISOString(),
+        nextMonthStart.toISOString(),
       );
 
-    return calculateMonthlyMinutes(
-      shifts,
-      personId,
-      year,
-      month,
-    );
-  }
+  return calculateMonthlyMinutes(
+    shifts,
+    personId,
+    year,
+    month,
+  );
+}
 
   async getWorkLimitStatus(
-    policy: WorkPolicy,
-    year: number,
-    month: number,
-  ) {
-    const shifts =
-      await this.shiftRepository.getByPerson(
+  policy: WorkPolicy,
+  year: number,
+  month: number,
+) {
+  const monthStart = new Date(
+    year,
+    month - 1,
+    1,
+  );
+
+  const nextMonthStart = new Date(
+    year,
+    month,
+    1,
+  );
+
+  const shifts =
+    await this.shiftRepository
+      .getByPersonAndDateRange(
         policy.personId,
+        monthStart.toISOString(),
+        nextMonthStart.toISOString(),
       );
 
-    return evaluateMonthlyWorkLimit(
-      shifts,
-      policy,
-      year,
-      month,
-    );
-  }
+  return evaluateMonthlyWorkLimit(
+    shifts,
+    policy,
+    year,
+    month,
+  );
+}
 }

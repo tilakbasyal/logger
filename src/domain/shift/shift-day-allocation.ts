@@ -1,80 +1,82 @@
 import type { Shift } from "./shift";
 import {
-  differenceInMinutes,
-  formatLocalDateTime,
+  calculateGrossShiftDurationMinutes,
+  calculateBreakMinutes,
+} from "./shift-duration";
+import {
   parseLocalDateTime,
+  startOfDay,
   startOfNextDay,
 } from "../time/time-utils";
 
 export interface ShiftDayAllocation {
   date: string;
-  startAt: string;
-  endAt: string;
   minutes: number;
 }
 
-/**
- * Splits a shift across calendar days.
- *
- * Example:
- *
- * 2026-09-15 23:00
- * →
- * 2026-09-16 03:00
- *
- * becomes:
- *
- * September 15: 60 minutes
- * September 16: 180 minutes
- */
-export function splitShiftByDay(
-  shift: Shift,
-): ShiftDayAllocation[] {
-  const start = parseLocalDateTime(shift.startAt);
-  const end = parseLocalDateTime(shift.endAt);
-
-  if (end < start) {
-    throw new Error(
-      "Shift end time cannot be before its start time.",
-    );
-  }
-
-  if (end.getTime() === start.getTime()) {
-    return [];
-  }
-
-  const allocations: ShiftDayAllocation[] = [];
-
-  let currentStart = new Date(start);
-
-  while (currentStart < end) {
-    const nextDay = startOfNextDay(currentStart);
-
-    const currentEnd =
-      end < nextDay ? new Date(end) : nextDay;
-
-    const minutes = differenceInMinutes(
-      currentStart,
-      currentEnd,
-    );
-
-    allocations.push({
-      date: formatDateOnly(currentStart),
-      startAt: formatLocalDateTime(currentStart),
-      endAt: formatLocalDateTime(currentEnd),
-      minutes,
-    });
-
-    currentStart = currentEnd;
-  }
-
-  return allocations;
-}
-
-function formatDateOnly(date: Date): string {
+function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+export function splitShiftByDay(
+  shift: Shift
+): ShiftDayAllocation[] {
+  const start = parseLocalDateTime(shift.startAt);
+  const end = parseLocalDateTime(shift.endAt);
+
+  const grossMinutes =
+    calculateGrossShiftDurationMinutes(shift);
+
+  const breakMinutes =
+    calculateBreakMinutes(grossMinutes);
+
+  const allocations: ShiftDayAllocation[] = [];
+
+  let currentDay = startOfDay(start);
+
+  while (currentDay < end) {
+    const nextDay = startOfNextDay(currentDay);
+
+    const segmentStart =
+      Math.max(start.getTime(), currentDay.getTime());
+
+    const segmentEnd =
+      Math.min(end.getTime(), nextDay.getTime());
+
+    if (segmentEnd > segmentStart) {
+      const minutes = Math.round(
+        (segmentEnd - segmentStart) / 60000
+      );
+
+      allocations.push({
+        date: formatDate(currentDay),
+        minutes,
+      });
+    }
+
+    currentDay = nextDay;
+  }
+
+  /*
+   * The break belongs to the complete shift, not to each
+   * individual calendar-day segment.
+   *
+   * We deduct it from the final allocation because the actual
+   * break timestamp is not stored.
+   */
+  if (breakMinutes > 0 && allocations.length > 0) {
+    const lastAllocation =
+      allocations[allocations.length - 1];
+
+    lastAllocation.minutes = Math.max(
+      0,
+      lastAllocation.minutes - breakMinutes
+    );
+  }
+
+  return allocations;
 }
