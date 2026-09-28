@@ -251,7 +251,7 @@ select:disabled {
 
 .app-navigation {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr) auto;
   align-items: center;
 
   width: min(100%, 900px);
@@ -435,4 +435,72 @@ select:disabled {
 .preset-button span {
   font-size: 0.9rem;
   opacity: 0.8;
+}
+
+
+.account-menu {
+  position: relative;
+  justify-self: end;
+}
+
+.account-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.account-button:hover {
+  background: #f5f5f5;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 240px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  z-index: 1000;
+}
+
+.account-user {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 4px;
+}
+
+.account-user span {
+  word-break: break-word;
+  font-size: 14px;
+}
+
+.account-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.account-menu-item:hover {
+  background: #f5f5f5;
+}
+
+.account-menu-item.logout {
+  border-top: 1px solid #eee;
+  margin-top: 4px;
 }
