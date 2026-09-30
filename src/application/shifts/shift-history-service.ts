@@ -4,7 +4,14 @@ import {
   calculateShiftDurationMinutes,
 } from "../../domain/shift/shift-duration";
 
-import { db } from "../../infrastructure/database/db";
+import type { PersonRepository } from "../../infrastructure/repositories/person-repository";
+
+import type {
+  EmployerRepository,
+  WorkLocationRepository,
+} from "../../infrastructure/repositories/workplace-repository";
+
+import type { ShiftRepository } from "../../infrastructure/repositories/shift-repository";
 
 export interface ShiftHistoryItem {
   shift: Shift;
@@ -17,6 +24,24 @@ export interface ShiftHistoryItem {
 }
 
 export class ShiftHistoryService {
+  private readonly shiftRepository: ShiftRepository;
+  private readonly personRepository: PersonRepository;
+  private readonly employerRepository: EmployerRepository;
+  private readonly workLocationRepository: WorkLocationRepository;
+
+  constructor(
+    shiftRepository: ShiftRepository,
+    personRepository: PersonRepository,
+    employerRepository: EmployerRepository,
+    workLocationRepository: WorkLocationRepository,
+  ) {
+    this.shiftRepository = shiftRepository;
+    this.personRepository = personRepository;
+    this.employerRepository = employerRepository;
+    this.workLocationRepository =
+      workLocationRepository;
+  }
+
   async getAll(): Promise<ShiftHistoryItem[]> {
     const [
       shifts,
@@ -24,10 +49,10 @@ export class ShiftHistoryService {
       employers,
       locations,
     ] = await Promise.all([
-      db.shifts.toArray(),
-      db.persons.toArray(),
-      db.employers.toArray(),
-      db.workLocations.toArray(),
+      this.shiftRepository.getAll(),
+      this.personRepository.getAll(),
+      this.employerRepository.getAll(),
+      this.workLocationRepository.getAll(),
     ]);
 
     const personMap = new Map(
@@ -98,9 +123,7 @@ export class ShiftHistoryService {
       );
   }
 
-  async delete(
-  id: string,
-): Promise<void> {
-  await db.shifts.delete(id);
-}
+  async delete(id: string): Promise<void> {
+    await this.shiftRepository.delete(id);
+  }
 }

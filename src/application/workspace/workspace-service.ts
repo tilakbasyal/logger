@@ -15,28 +15,23 @@ export class WorkspaceService {
     }
 
     if (!user) {
-      throw new Error(
-        "Authentication required.",
-      );
+      throw new Error("Authentication required.");
     }
 
-    const { data, error } =
-      await supabase.rpc(
-        "create_workspace_with_owner_and_person",
-        {
-          workspace_name: workspaceName,
-          person_name: personName,
-        },
-      );
+    const { data, error } = await supabase.rpc(
+      "create_workspace_with_owner_and_person",
+      {
+        workspace_name: workspaceName,
+        person_name: personName,
+      },
+    );
 
     if (error) {
       throw error;
     }
 
     if (!data) {
-      throw new Error(
-        "Workspace creation did not return an ID.",
-      );
+      throw new Error("Workspace creation did not return an ID.");
     }
 
     return data;
@@ -56,10 +51,7 @@ export class WorkspaceService {
       return false;
     }
 
-    const {
-      data,
-      error,
-    } = await supabase
+    const { data, error } = await supabase
       .from("workspace_memberships")
       .select("id")
       .eq("user_id", user.id)
@@ -71,7 +63,34 @@ export class WorkspaceService {
 
     return data.length > 0;
   }
+
+  async getCurrentWorkspaceId(): Promise<string | null> {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError) {
+      throw userError;
+    }
+
+    if (!user) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from("workspace_memberships")
+      .select("workspace_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data?.workspace_id ?? null;
+  }
 }
 
-export const workspaceService =
-  new WorkspaceService();
+export const workspaceService = new WorkspaceService();

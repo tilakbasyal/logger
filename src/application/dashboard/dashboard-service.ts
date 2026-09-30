@@ -5,7 +5,18 @@ import type { Shift } from "../../domain/shift/shift";
 // import type { WorkPolicy } from "../../domain/work-policy/work-policy";
 import type { PayrollSchedule } from "../../domain/payroll/payroll-schedule";
 
-import { db } from "../../infrastructure/database/db";
+import type { PersonRepository } from "../../infrastructure/repositories/person-repository";
+
+import type {
+  EmployerRepository,
+  WorkLocationRepository,
+} from "../../infrastructure/repositories/workplace-repository";
+
+import type { ShiftRepository } from "../../infrastructure/repositories/shift-repository";
+
+import type { WorkPolicyRepository } from "../../infrastructure/repositories/work-policy-repository";
+
+import type { PayrollScheduleRepository } from "../../infrastructure/repositories/payroll-schedule-repository";
 
 import { calculateMonthlyMinutes } from "../hours/monthly-hours";
 import { calculatePayrollMinutes } from "../hours/payroll-hours";
@@ -61,26 +72,43 @@ export interface DashboardData {
 }
 
 export class DashboardService {
+  private readonly personRepository: PersonRepository;
+  private readonly employerRepository: EmployerRepository;
+  private readonly workLocationRepository: WorkLocationRepository;
+  private readonly shiftRepository: ShiftRepository;
+  private readonly workPolicyRepository: WorkPolicyRepository;
+  private readonly payrollScheduleRepository: PayrollScheduleRepository;
+
+  constructor(
+    personRepository: PersonRepository,
+    employerRepository: EmployerRepository,
+    workLocationRepository: WorkLocationRepository,
+    shiftRepository: ShiftRepository,
+    workPolicyRepository: WorkPolicyRepository,
+    payrollScheduleRepository: PayrollScheduleRepository,
+  ) {
+    this.personRepository = personRepository;
+    this.employerRepository = employerRepository;
+    this.workLocationRepository = workLocationRepository;
+    this.shiftRepository = shiftRepository;
+    this.workPolicyRepository = workPolicyRepository;
+    this.payrollScheduleRepository = payrollScheduleRepository;
+  }
+
   async getDashboardData(
     year: number,
     month: number,
     referenceDate: Date = new Date(),
   ): Promise<DashboardData> {
-    const [
-      people,
-      employers,
-      locations,
-      shifts,
-      policies,
-      payrollSchedules,
-    ] = await Promise.all([
-      db.persons.toArray(),
-      db.employers.toArray(),
-      db.workLocations.toArray(),
-      db.shifts.toArray(),
-      db.workPolicies.toArray(),
-      db.payrollSchedules.toArray(),
-    ]);
+    const [people, employers, locations, shifts, policies, payrollSchedules] =
+      await Promise.all([
+        this.personRepository.getAll(),
+        this.employerRepository.getAll(),
+        this.workLocationRepository.getAll(),
+        this.shiftRepository.getAll(),
+        this.workPolicyRepository.getAll(),
+        this.payrollScheduleRepository.getAll(),
+      ]);
 
     const result: PersonDashboard[] = people.map((person) => {
       const personShifts = shifts.filter(
@@ -102,22 +130,20 @@ export class DashboardService {
         month,
       );
 
-      const payrollEmployerHours =
-        this.calculatePayrollEmployerHours(
-          person.id,
-          personShifts,
-          locations,
-          employers,
-          payrollSchedules,
-          referenceDate,
-        );
+      const payrollEmployerHours = this.calculatePayrollEmployerHours(
+        person.id,
+        personShifts,
+        locations,
+        employers,
+        payrollSchedules,
+        referenceDate,
+      );
 
       const policy = policies
         .filter(
           (item) =>
             item.personId === person.id &&
-            new Date(item.effectiveFrom) <=
-              new Date(year, month - 1, 1),
+            new Date(item.effectiveFrom) <= new Date(year, month - 1, 1),
         )
         .sort(
           (a, b) =>
@@ -128,13 +154,12 @@ export class DashboardService {
       let limit: PersonDashboard["limit"];
 
       if (policy) {
-        const workLimitStatus =
-          evaluateMonthlyWorkLimit(
-            personShifts,
-            policy,
-            year,
-            month,
-          );
+        const workLimitStatus = evaluateMonthlyWorkLimit(
+          personShifts,
+          policy,
+          year,
+          month,
+        );
 
         limit = workLimitStatus;
       }
@@ -195,43 +220,25 @@ export class DashboardService {
       const shiftStart = new Date(shift.startAt);
       const shiftEnd = new Date(shift.endAt);
 
-      const monthStart = new Date(
-        year,
-        month - 1,
-        1,
-      );
+      const monthStart = new Date(year, month - 1, 1);
 
-      const nextMonthStart = new Date(
-        year,
-        month,
-        1,
-      );
+      const nextMonthStart = new Date(year, month, 1);
 
-      const overlapStart = Math.max(
-        shiftStart.getTime(),
-        monthStart.getTime(),
-      );
+      const overlapStart = Math.max(shiftStart.getTime(), monthStart.getTime());
 
-      const overlapEnd = Math.min(
-        shiftEnd.getTime(),
-        nextMonthStart.getTime(),
-      );
+      const overlapEnd = Math.min(shiftEnd.getTime(), nextMonthStart.getTime());
 
       if (overlapEnd <= overlapStart) {
         continue;
       }
 
-      const minutes = Math.round(
-        (overlapEnd - overlapStart) / 60000,
-      );
+      const minutes = Math.round((overlapEnd - overlapStart) / 60000);
 
       employerResult.minutes += minutes;
 
-      let locationResult =
-        employerResult.locations.find(
-          (item) =>
-            item.locationId === location.id,
-        );
+      let locationResult = employerResult.locations.find(
+        (item) => item.locationId === location.id,
+      );
 
       if (!locationResult) {
         locationResult = {
@@ -240,22 +247,16 @@ export class DashboardService {
           minutes: 0,
         };
 
-        employerResult.locations.push(
-          locationResult,
-        );
+        employerResult.locations.push(locationResult);
       }
 
       locationResult.minutes += minutes;
     }
 
-    return Array.from(result.values()).map(
-      (employer) => ({
-        ...employer,
-        locations: employer.locations.sort(
-          (a, b) => b.minutes - a.minutes,
-        ),
-      }),
-    );
+    return Array.from(result.values()).map((employer) => ({
+      ...employer,
+      locations: employer.locations.sort((a, b) => b.minutes - a.minutes),
+    }));
   }
 
   private calculatePayrollEmployerHours(
@@ -270,15 +271,8 @@ export class DashboardService {
 
     for (const employer of employers) {
       const schedule = payrollSchedules
-        .filter(
-          (item) =>
-            item.employerId === employer.id,
-        )
-        .filter(
-          (item) =>
-            new Date(item.effectiveFrom) <=
-            referenceDate,
-        )
+        .filter((item) => item.employerId === employer.id)
+        .filter((item) => new Date(item.effectiveFrom) <= referenceDate)
         .sort(
           (a, b) =>
             new Date(b.effectiveFrom).getTime() -
@@ -289,23 +283,15 @@ export class DashboardService {
         continue;
       }
 
-      const period = getPayrollPeriod(
-        schedule,
-        referenceDate,
-      );
+      const period = getPayrollPeriod(schedule, referenceDate);
 
-      const employerShifts = personShifts.filter(
-        (shift) => {
-          const location = locations.find(
-            (item) =>
-              item.id === shift.workLocationId,
-          );
+      const employerShifts = personShifts.filter((shift) => {
+        const location = locations.find(
+          (item) => item.id === shift.workLocationId,
+        );
 
-          return (
-            location?.employerId === employer.id
-          );
-        },
-      );
+        return location?.employerId === employer.id;
+      });
 
       const minutes = calculatePayrollMinutes(
         employerShifts,
@@ -314,31 +300,23 @@ export class DashboardService {
         referenceDate,
       );
 
-      const locationHours: PayrollLocationHours[] =
-        [];
+      const locationHours: PayrollLocationHours[] = [];
 
       for (const location of locations) {
-        if (
-          location.employerId !==
-          employer.id
-        ) {
+        if (location.employerId !== employer.id) {
           continue;
         }
 
-        const locationShifts =
-          employerShifts.filter(
-            (shift) =>
-              shift.workLocationId ===
-              location.id,
-          );
+        const locationShifts = employerShifts.filter(
+          (shift) => shift.workLocationId === location.id,
+        );
 
-        const locationMinutes =
-          calculatePayrollMinutes(
-            locationShifts,
-            personId,
-            schedule,
-            referenceDate,
-          );
+        const locationMinutes = calculatePayrollMinutes(
+          locationShifts,
+          personId,
+          schedule,
+          referenceDate,
+        );
 
         if (locationMinutes > 0) {
           locationHours.push({
@@ -353,14 +331,10 @@ export class DashboardService {
         result.push({
           employerId: employer.id,
           employerName: employer.name,
-          periodStart:
-            period.start.toISOString(),
-          periodEnd:
-            period.end.toISOString(),
+          periodStart: period.start.toISOString(),
+          periodEnd: period.end.toISOString(),
           minutes,
-          locations: locationHours.sort(
-            (a, b) => b.minutes - a.minutes,
-          ),
+          locations: locationHours.sort((a, b) => b.minutes - a.minutes),
         });
       }
     }
