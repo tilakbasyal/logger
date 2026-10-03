@@ -10,6 +10,7 @@ import { SupabaseShiftRepository } from "../infrastructure/repositories/shift-re
 import { SupabaseWorkPolicyRepository } from "../infrastructure/repositories/work-policy-repository";
 
 import { SupabasePayrollScheduleRepository } from "../infrastructure/repositories/payroll-schedule-repository";
+import { SupabaseShiftPresetRepository } from "../infrastructure/repositories/shift-preset-repository";
 
 const dashboardPersonRepository = new SupabasePersonRepository();
 
@@ -31,16 +32,11 @@ import { ConfigurationService } from "./configuration-service";
 import { ShiftHistoryService } from "./shifts/shift-history-service";
 import { DashboardService } from "./dashboard/dashboard-service";
 
-import { DexieShiftPresetRepository } from "../infrastructure/repositories/shift-preset-repository";
 import { ShiftPresetService } from "./shifts/shift-preset-service";
 
-//import { DexieShiftRepository } from "../infrastructure/repositories/shift-repository";
-
-//const shiftRepository = new DexieShiftRepository();
-//const shiftPresetRepository = new DexieShiftPresetRepository();
 
 const shiftRepository = new SupabaseShiftRepository();
-const shiftPresetRepository = new DexieShiftPresetRepository();
+const shiftPresetRepository =new SupabaseShiftPresetRepository();
 export const shiftService = new ShiftService(shiftRepository);
 export const hoursService = new HoursService(shiftRepository);
 

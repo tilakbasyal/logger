@@ -4,6 +4,7 @@ export class WorkspaceService {
   async createWorkspaceWithOwnerAndPerson(
     workspaceName: string,
     personName: string,
+    maxWorkHoursPerMonth?: number,
   ): Promise<string> {
     const {
       data: { user },
@@ -23,6 +24,7 @@ export class WorkspaceService {
       {
         workspace_name: workspaceName,
         person_name: personName,
+        max_work_hours_per_month: maxWorkHoursPerMonth ?? null,
       },
     );
 

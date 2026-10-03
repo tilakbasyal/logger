@@ -6,14 +6,14 @@ import { configurationService } from "../application/services";
 
 function ConfigurationPage() {
   const [employers, setEmployers] = useState<Employer[]>([]);
-  const [locations, setLocations] = useState<
-    Record<string, WorkLocation[]>
-  >({});
+  const [locations, setLocations] = useState<Record<string, WorkLocation[]>>(
+    {},
+  );
 
   const [employerName, setEmployerName] = useState("");
-  const [locationNames, setLocationNames] = useState<
-    Record<string, string>
-  >({});
+  const [locationNames, setLocationNames] = useState<Record<string, string>>(
+    {},
+  );
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,36 +24,25 @@ function ConfigurationPage() {
       setLoading(true);
       setError(null);
 
-      const employerData =
-        await configurationService.getEmployers();
+      const employerData = await configurationService.getEmployers();
 
       setEmployers(employerData);
 
-      const locationEntries =
-        await Promise.all(
-          employerData.map(async (employer) => {
-            const employerLocations =
-              await configurationService.getLocationsForEmployer(
-                employer.id,
-              );
+      const locationEntries = await Promise.all(
+        employerData.map(async (employer) => {
+          const employerLocations =
+            await configurationService.getLocationsForEmployer(employer.id);
 
-            return [
-              employer.id,
-              employerLocations,
-            ] as const;
-          }),
-        );
-
-      setLocations(
-        Object.fromEntries(locationEntries),
+          return [employer.id, employerLocations] as const;
+        }),
       );
+
+      setLocations(Object.fromEntries(locationEntries));
     } catch (err) {
       console.error(err);
 
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load configuration.",
+        err instanceof Error ? err.message : "Failed to load configuration.",
       );
     } finally {
       setLoading(false);
@@ -76,9 +65,7 @@ function ConfigurationPage() {
       setSaving(true);
       setError(null);
 
-      await configurationService.addEmployer(
-        trimmedName,
-      );
+      await configurationService.addEmployer(trimmedName);
 
       setEmployerName("");
 
@@ -86,21 +73,14 @@ function ConfigurationPage() {
     } catch (err) {
       console.error(err);
 
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to add employer.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to add employer.");
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleAddLocation(
-    employerId: string,
-  ) {
-    const name =
-      locationNames[employerId]?.trim() ?? "";
+  async function handleAddLocation(employerId: string) {
+    const name = locationNames[employerId]?.trim() ?? "";
 
     if (!name) {
       setError("Please enter a location name.");
@@ -111,10 +91,7 @@ function ConfigurationPage() {
       setSaving(true);
       setError(null);
 
-      await configurationService.addLocation(
-        employerId,
-        name,
-      );
+      await configurationService.addLocation(employerId, name);
 
       setLocationNames((current) => ({
         ...current,
@@ -125,11 +102,7 @@ function ConfigurationPage() {
     } catch (err) {
       console.error(err);
 
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to add location.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to add location.");
     } finally {
       setSaving(false);
     }
@@ -149,8 +122,7 @@ function ConfigurationPage() {
         ) : (
           <div>
             {employers.map((employer) => {
-              const employerLocations =
-                locations[employer.id] ?? [];
+              const employerLocations = locations[employer.id] ?? [];
 
               return (
                 <article key={employer.id}>
@@ -159,44 +131,29 @@ function ConfigurationPage() {
                   <h4>Locations</h4>
 
                   {employerLocations.length === 0 ? (
-                    <p>
-                      No locations configured yet.
-                    </p>
+                    <p>No locations configured yet.</p>
                   ) : (
                     <ul>
-                      {employerLocations.map(
-                        (location) => (
-                          <li key={location.id}>
-                            {location.name}
-                          </li>
-                        ),
-                      )}
+                      {employerLocations.map((location) => (
+                        <li key={location.id}>{location.name}</li>
+                      ))}
                     </ul>
                   )}
 
                   <div>
-                    <label
-                      htmlFor={`location-${employer.id}`}
-                    >
+                    <label htmlFor={`location-${employer.id}`}>
                       Location name
                     </label>
 
                     <input
                       id={`location-${employer.id}`}
                       type="text"
-                      value={
-                        locationNames[
-                          employer.id
-                        ] ?? ""
-                      }
+                      value={locationNames[employer.id] ?? ""}
                       onChange={(event) =>
-                        setLocationNames(
-                          (current) => ({
-                            ...current,
-                            [employer.id]:
-                              event.target.value,
-                          }),
-                        )
+                        setLocationNames((current) => ({
+                          ...current,
+                          [employer.id]: event.target.value,
+                        }))
                       }
                       placeholder="Enter location name"
                       disabled={saving}
@@ -204,16 +161,10 @@ function ConfigurationPage() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        void handleAddLocation(
-                          employer.id,
-                        )
-                      }
+                      onClick={() => void handleAddLocation(employer.id)}
                       disabled={saving}
                     >
-                      {saving
-                        ? "Adding..."
-                        : "Add location"}
+                      {saving ? "Adding..." : "Add location"}
                     </button>
                   </div>
                 </article>
@@ -225,31 +176,23 @@ function ConfigurationPage() {
         <div>
           <h3>Add employer</h3>
 
-          <label htmlFor="employer-name">
-            Employer name
-          </label>
+          <label htmlFor="employer-name">Employer name</label>
 
           <input
             id="employer-name"
             type="text"
             value={employerName}
-            onChange={(event) =>
-              setEmployerName(event.target.value)
-            }
+            onChange={(event) => setEmployerName(event.target.value)}
             placeholder="Enter employer name"
             disabled={saving}
           />
 
           <button
             type="button"
-            onClick={() =>
-              void handleAddEmployer()
-            }
+            onClick={() => void handleAddEmployer()}
             disabled={saving}
           >
-            {saving
-              ? "Adding..."
-              : "Add employer"}
+            {saving ? "Adding..." : "Add employer"}
           </button>
         </div>
 

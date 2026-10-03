@@ -19,6 +19,7 @@ import type { WorkPolicyRepository } from "../../infrastructure/repositories/wor
 import type { PayrollScheduleRepository } from "../../infrastructure/repositories/payroll-schedule-repository";
 
 import { calculateMonthlyMinutes } from "../hours/monthly-hours";
+import { calculateDailyMinutes } from "../hours/daily-hours";
 import { calculatePayrollMinutes } from "../hours/payroll-hours";
 import { evaluateMonthlyWorkLimit } from "../hours/work-policy-evaluator";
 
@@ -55,6 +56,20 @@ export interface PayrollEmployerHours {
 export interface PersonDashboard {
   person: Person;
   monthlyMinutes: number;
+  dailyMinutes: {
+    date: string;
+    minutes: number;
+    employers: {
+      employerId: string;
+      employerName: string;
+      minutes: number;
+      locations: {
+        locationId: string;
+        locationName: string;
+        minutes: number;
+      }[];
+    }[];
+  }[];
   employerHours: EmployerHours[];
   payrollEmployerHours: PayrollEmployerHours[];
   limit?: {
@@ -122,6 +137,15 @@ export class DashboardService {
         month,
       );
 
+      const dailyMinutes = calculateDailyMinutes(
+        personShifts,
+        person.id,
+        locations,
+        employers,
+        year,
+        month,
+      );
+
       const employerHours = this.calculateEmployerHours(
         personShifts,
         locations,
@@ -139,17 +163,14 @@ export class DashboardService {
         referenceDate,
       );
 
+      const monthStartDate = `${year}-${String(month).padStart(2, "0")}-01`;
+
       const policy = policies
         .filter(
           (item) =>
-            item.personId === person.id &&
-            new Date(item.effectiveFrom) <= new Date(year, month - 1, 1),
+            item.personId === person.id && item.effectiveFrom <= monthStartDate,
         )
-        .sort(
-          (a, b) =>
-            new Date(b.effectiveFrom).getTime() -
-            new Date(a.effectiveFrom).getTime(),
-        )[0];
+        .sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom))[0];
 
       let limit: PersonDashboard["limit"];
 
@@ -167,6 +188,7 @@ export class DashboardService {
       return {
         person,
         monthlyMinutes,
+        dailyMinutes,
         employerHours,
         payrollEmployerHours,
         limit,
