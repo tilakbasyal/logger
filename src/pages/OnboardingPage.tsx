@@ -58,14 +58,16 @@ function OnboardingPage({ onCompleted }: OnboardingPageProps) {
   }
 
   return (
-    <main className="page">
-      <section>
-        <h1>Welcome to Work Hours</h1>
+    <main className="onboarding-page">
+      <section className="onboarding-card">
+        <h1 className="onboarding-title">Welcome to Work Hours</h1>
 
-        <p>Let's get started by telling us a little about yourself.</p>
+        <p className="onboarding-intro">
+          Let's get started by telling us a little about yourself.
+        </p>
 
-        <form onSubmit={handleSubmit}>
-          <div>
+        <form className="onboarding-form" onSubmit={handleSubmit}>
+          <div className="onboarding-field">
             <label htmlFor="person-name">Your name</label>
 
             <input
@@ -80,34 +82,36 @@ function OnboardingPage({ onCompleted }: OnboardingPageProps) {
             />
           </div>
 
-          <div>
-            <fieldset disabled={saving}>
+          <div className="onboarding-field">
+            <fieldset className="onboarding-options" disabled={saving}>
               <legend>Do you have a work-hour limit?</legend>
 
-              <label>
-                <input
-                  type="radio"
-                  name="work-hour-limit"
-                  checked={!hasWorkHourLimit}
-                  onChange={() => setHasWorkHourLimit(false)}
-                />
-                No
-              </label>
+              <div className="onboarding-radio-group">
+                <label className="onboarding-radio">
+                  <input
+                    type="radio"
+                    name="work-hour-limit"
+                    checked={!hasWorkHourLimit}
+                    onChange={() => setHasWorkHourLimit(false)}
+                  />
+                  No
+                </label>
 
-              <label>
-                <input
-                  type="radio"
-                  name="work-hour-limit"
-                  checked={hasWorkHourLimit}
-                  onChange={() => setHasWorkHourLimit(true)}
-                />
-                Yes
-              </label>
+                <label className="onboarding-radio">
+                  <input
+                    type="radio"
+                    name="work-hour-limit"
+                    checked={hasWorkHourLimit}
+                    onChange={() => setHasWorkHourLimit(true)}
+                  />
+                  Yes
+                </label>
+              </div>
             </fieldset>
           </div>
 
           {hasWorkHourLimit && (
-            <div>
+            <div className="onboarding-field">
               <label htmlFor="max-hours-per-month">
                 Maximum hours per month
               </label>
@@ -125,9 +129,13 @@ function OnboardingPage({ onCompleted }: OnboardingPageProps) {
             </div>
           )}
 
-          {error && <p role="alert">{error}</p>}
+          {error && (
+            <p className="onboarding-error" role="alert">
+              {error}
+            </p>
+          )}
 
-          <button type="submit" disabled={saving}>
+          <button className="onboarding-submit" type="submit" disabled={saving}>
             {saving ? "Setting up..." : "Continue"}
           </button>
         </form>

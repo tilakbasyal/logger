@@ -17,6 +17,7 @@ type Page = "dashboard" | "add" | "history" | "presets" | "configuration";
 
 function App() {
   const [page, setPage] = useState<Page>("dashboard");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [user, setUser] = useState<AuthUser | null>(null);
 
@@ -129,45 +130,78 @@ function App() {
       <nav className="app-navigation">
         <button
           type="button"
-          className={page === "dashboard" ? "nav-button active" : "nav-button"}
-          onClick={() => setPage("dashboard")}
-        >
-          Dashboard
-        </button>
-
-        <button
-          type="button"
-          className={page === "add" ? "nav-button active" : "nav-button"}
-          onClick={() => setPage("add")}
-        >
-          Add Work
-        </button>
-
-        <button
-          type="button"
-          className={page === "history" ? "nav-button active" : "nav-button"}
-          onClick={() => setPage("history")}
-        >
-          History
-        </button>
-
-        <button
-          type="button"
-          className={page === "presets" ? "nav-button active" : "nav-button"}
-          onClick={() => setPage("presets")}
-        >
-          Presets
-        </button>
-
-        <button
-          type="button"
-          className={
-            page === "configuration" ? "nav-button active" : "nav-button"
+          className="mobile-menu-button"
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          aria-expanded={isMobileMenuOpen}
+          aria-label={
+            isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
           }
-          onClick={() => setPage("configuration")}
         >
-          Configuration
+          {isMobileMenuOpen ? "✕" : "☰"}
         </button>
+
+        <span className="mobile-app-brand">Work Hours</span>
+
+        <div className={isMobileMenuOpen ? "nav-links open" : "nav-links"}>
+          <button
+            type="button"
+            className={
+              page === "dashboard" ? "nav-button active" : "nav-button"
+            }
+            onClick={() => {
+              setPage("dashboard");
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            Dashboard
+          </button>
+
+          <button
+            type="button"
+            className={page === "add" ? "nav-button active" : "nav-button"}
+            onClick={() => {
+              setPage("add");
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            Add Work
+          </button>
+
+          <button
+            type="button"
+            className={page === "history" ? "nav-button active" : "nav-button"}
+            onClick={() => {
+              setPage("history");
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            History
+          </button>
+
+          <button
+            type="button"
+            className={page === "presets" ? "nav-button active" : "nav-button"}
+            onClick={() => {
+              setPage("presets");
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            Presets
+          </button>
+
+          <button
+            type="button"
+            className={
+              page === "configuration" ? "nav-button active" : "nav-button"
+            }
+            onClick={() => {
+              setPage("configuration");
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            Configuration
+          </button>
+        </div>
 
         <AccountMenu user={user} />
       </nav>

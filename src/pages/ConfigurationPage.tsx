@@ -109,94 +109,121 @@ function ConfigurationPage() {
   }
 
   return (
-    <main className="page">
-      <section>
-        <h1>Configuration</h1>
+    <main className="configuration-page">
+      <section className="configuration-content">
+        <header className="configuration-header">
+          <h1>Configuration</h1>
+          <p>Manage your employers and work locations.</p>
+        </header>
 
-        <h2>Employers</h2>
+        <section className="configuration-section">
+          <h2>Employers</h2>
 
-        {loading ? (
-          <p>Loading configuration...</p>
-        ) : employers.length === 0 ? (
-          <p>No employers configured yet.</p>
-        ) : (
-          <div>
-            {employers.map((employer) => {
-              const employerLocations = locations[employer.id] ?? [];
+          {loading ? (
+            <p className="configuration-muted">Loading configuration...</p>
+          ) : employers.length === 0 ? (
+            <div className="configuration-empty">
+              <p>No employers configured yet.</p>
+            </div>
+          ) : (
+            <div className="employer-list">
+              {employers.map((employer) => {
+                const employerLocations = locations[employer.id] ?? [];
 
-              return (
-                <article key={employer.id}>
-                  <h3>{employer.name}</h3>
+                return (
+                  <article className="employer-card" key={employer.id}>
+                    <div className="employer-card-header">
+                      <h3>{employer.name}</h3>
+                    </div>
 
-                  <h4>Locations</h4>
+                    <div className="employer-locations">
+                      <h4>Locations</h4>
 
-                  {employerLocations.length === 0 ? (
-                    <p>No locations configured yet.</p>
-                  ) : (
-                    <ul>
-                      {employerLocations.map((location) => (
-                        <li key={location.id}>{location.name}</li>
-                      ))}
-                    </ul>
-                  )}
+                      {employerLocations.length === 0 ? (
+                        <p className="configuration-muted">
+                          No locations configured yet.
+                        </p>
+                      ) : (
+                        <ul>
+                          {employerLocations.map((location) => (
+                            <li key={location.id}>{location.name}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
 
-                  <div>
-                    <label htmlFor={`location-${employer.id}`}>
-                      Location name
-                    </label>
+                    <div className="add-location-form">
+                      <label htmlFor={`location-${employer.id}`}>
+                        Add location
+                      </label>
 
-                    <input
-                      id={`location-${employer.id}`}
-                      type="text"
-                      value={locationNames[employer.id] ?? ""}
-                      onChange={(event) =>
-                        setLocationNames((current) => ({
-                          ...current,
-                          [employer.id]: event.target.value,
-                        }))
-                      }
-                      placeholder="Enter location name"
-                      disabled={saving}
-                    />
+                      <div className="configuration-input-row">
+                        <input
+                          id={`location-${employer.id}`}
+                          type="text"
+                          value={locationNames[employer.id] ?? ""}
+                          onChange={(event) =>
+                            setLocationNames((current) => ({
+                              ...current,
+                              [employer.id]: event.target.value,
+                            }))
+                          }
+                          placeholder="Enter location name"
+                          disabled={saving}
+                        />
 
-                    <button
-                      type="button"
-                      onClick={() => void handleAddLocation(employer.id)}
-                      disabled={saving}
-                    >
-                      {saving ? "Adding..." : "Add location"}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+                        <button
+                          className="configuration-button"
+                          type="button"
+                          onClick={() => void handleAddLocation(employer.id)}
+                          disabled={saving}
+                        >
+                          {saving ? "Adding..." : "Add location"}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="add-employer-card">
+          <h2>Add employer</h2>
+
+          <p>Add a new employer to your workspace.</p>
+
+          <div className="add-employer-form">
+            <label htmlFor="employer-name">Employer name</label>
+
+            <div className="configuration-input-row">
+              <input
+                id="employer-name"
+                type="text"
+                value={employerName}
+                onChange={(event) => setEmployerName(event.target.value)}
+                placeholder="Enter employer name"
+                disabled={saving}
+              />
+
+              <button
+                className="configuration-button"
+                type="button"
+                onClick={() => void handleAddEmployer()}
+                disabled={saving}
+              >
+                {saving ? "Adding..." : "Add employer"}
+              </button>
+            </div>
           </div>
+        </section>
+
+        {error && (
+          <p className="configuration-error" role="alert">
+            {error}
+          </p>
         )}
-
-        <div>
-          <h3>Add employer</h3>
-
-          <label htmlFor="employer-name">Employer name</label>
-
-          <input
-            id="employer-name"
-            type="text"
-            value={employerName}
-            onChange={(event) => setEmployerName(event.target.value)}
-            placeholder="Enter employer name"
-            disabled={saving}
-          />
-
-          <button
-            type="button"
-            onClick={() => void handleAddEmployer()}
-            disabled={saving}
-          >
-            {saving ? "Adding..." : "Add employer"}
-          </button>
-        </div>
-
-        {error && <p role="alert">{error}</p>}
       </section>
     </main>
   );

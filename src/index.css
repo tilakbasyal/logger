@@ -248,61 +248,72 @@ select:disabled {
   color: #666;
 }
 
+/* Main navigation */
+
 .app-navigation {
   display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 12px;
 
-  width: min(100%, 900px);
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
 
-  padding: 8px 12px;
-  box-sizing: border-box;
-}
+  padding: 10px 16px;
 
-.app-navigation button {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: none;
-  background: transparent;
-
-  padding: 12px 16px;
-
-  font: inherit;
-  font-weight: 600;
-  font-size: 1.1rem;
-
-  cursor: pointer;
-}
-
-.app-navigation button.active {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.nav-links {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
 }
 
 .nav-button {
-  flex: 1;
+  min-height: 42px;
+  padding: 9px 14px;
 
   border: none;
   border-radius: 10px;
 
   background: transparent;
-
-  padding: 10px;
-
   color: #666;
+
+  font: inherit;
+  font-size: 14px;
   font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.nav-button:hover {
+  background: #f5f5f5;
+  color: #222;
 }
 
 .nav-button.active {
-  background: white;
-  color: #222;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+  background: #222;
+  color: white;
+}
+
+.nav-button.active:hover {
+  background: #222;
+  color: white;
+}
+
+.mobile-menu-button,
+.mobile-app-brand {
+  display: none;
 }
 
 .dashboard-person {
@@ -491,12 +502,6 @@ select:disabled {
   gap: 10px;
 }
 
-.employer-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-}
-
 .employer-header {
   display: flex;
   justify-content: space-between;
@@ -576,20 +581,29 @@ select:disabled {
 .account-menu {
   position: relative;
   justify-self: end;
+  margin-left: 4px;
 }
 
 .account-button {
   width: 42px;
   height: 42px;
-  border: 1px solid #ccc;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d8d8d8;
   border-radius: 50%;
-  background: white;
+
+  background: #f5f5f5;
+  color: #333;
+
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .account-button:hover {
-  background: #f5f5f5;
+  background: #eaeaea;
 }
 
 .account-dropdown {
@@ -770,5 +784,456 @@ select:disabled {
 
   .auth-brand {
     font-size: 24px;
+  }
+}
+
+/* Onboarding */
+
+.onboarding-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 32px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.onboarding-title {
+  margin: 0;
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.onboarding-intro {
+  margin: 12px 0 28px;
+  text-align: center;
+  color: #666;
+  line-height: 1.5;
+}
+
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.onboarding-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.onboarding-field > label,
+.onboarding-options legend {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.onboarding-field input[type="text"],
+.onboarding-field input[type="number"] {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: white;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.onboarding-field input[type="text"]:focus,
+.onboarding-field input[type="number"]:focus {
+  border-color: #222;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.onboarding-options {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+}
+
+.onboarding-options legend {
+  padding: 0 6px;
+}
+
+.onboarding-radio-group {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.onboarding-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.onboarding-radio input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.onboarding-submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 10px;
+  background: #222;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.onboarding-submit:hover {
+  background: #111;
+}
+
+.onboarding-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.onboarding-error {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fce8e8;
+  color: #a40000;
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .onboarding-card {
+    padding: 24px 20px;
+    border-radius: 14px;
+  }
+
+  .onboarding-title {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 700px) {
+  .app-navigation {
+    grid-template-columns: 42px 1fr auto;
+    gap: 10px;
+
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+
+  .mobile-menu-button {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 10px;
+
+    background: transparent;
+    color: #333;
+
+    font-size: 24px;
+    line-height: 1;
+
+    cursor: pointer;
+  }
+
+  .mobile-menu-button:hover {
+    background: #f5f5f5;
+  }
+
+  .mobile-app-brand {
+    display: block;
+
+    font-size: 17px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .nav-links {
+    display: none;
+
+    grid-column: 1 / -1;
+
+    grid-template-columns: 1fr;
+    gap: 4px;
+
+    padding-top: 6px;
+    border-top: 1px solid #eee;
+  }
+
+  .nav-links.open {
+    display: grid;
+  }
+
+  .nav-button {
+    width: 100%;
+    justify-content: flex-start;
+
+    min-height: 44px;
+    padding: 10px 14px;
+
+    text-align: left;
+  }
+
+  .account-menu {
+    margin-left: 0;
+  }
+}
+
+/* Configuration */
+
+.configuration-page {
+  width: 100%;
+  padding: 32px 16px 48px;
+}
+
+.configuration-content {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.configuration-header {
+  margin-bottom: 32px;
+}
+
+.configuration-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.configuration-header p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.configuration-section {
+  margin-bottom: 32px;
+}
+
+.configuration-section > h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+
+.employer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.employer-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.employer-card-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.employer-locations {
+  margin-top: 20px;
+}
+
+.employer-locations h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.employer-locations ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.employer-locations li {
+  padding: 4px 0;
+  color: #333;
+}
+
+.configuration-muted {
+  margin: 0;
+  color: #777;
+  font-size: 14px;
+}
+
+.add-location-form,
+.add-employer-form {
+  margin-top: 20px;
+}
+
+.add-location-form label,
+.add-employer-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.configuration-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.configuration-input-row input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 12px;
+
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+
+  background: white;
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.configuration-input-row input:focus {
+  border-color: #222;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.configuration-button {
+  min-height: 46px;
+  padding: 10px 16px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #222;
+  color: white;
+
+  font-weight: 600;
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.configuration-button:hover {
+  background: #111;
+}
+
+.configuration-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-employer-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 20px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.add-employer-card h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.add-employer-card > p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.configuration-error {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  background: #fce8e8;
+  color: #a40000;
+
+  font-size: 14px;
+}
+
+.configuration-empty {
+  padding: 24px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  color: #666;
+}
+
+@media (max-width: 600px) {
+  .configuration-page {
+    padding: 24px 16px 40px;
+  }
+
+  .configuration-header {
+    margin-bottom: 24px;
+  }
+
+  .configuration-header h1 {
+    font-size: 28px;
+  }
+
+  .employer-card,
+  .add-employer-card {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .configuration-input-row {
+    flex-direction: column;
+  }
+
+  .configuration-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .employer-card {
+    padding: 18px;
+  }
+
+  .employer-locations {
+    margin-top: 16px;
+  }
+
+  .employer-locations li {
+    padding: 2px 0;
+  }
+
+  .add-location-form {
+    margin-top: 16px;
   }
 }
