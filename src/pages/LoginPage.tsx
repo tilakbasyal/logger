@@ -4,14 +4,10 @@ import type { AuthUser } from "../application/auth/auth-service";
 import { authService } from "../application/auth/auth-service";
 
 interface LoginPageProps {
-  onAuthenticated: (
-    user: AuthUser,
-  ) => void;
+  onAuthenticated: (user: AuthUser) => void;
 }
 
-export default function LoginPage({
-  onAuthenticated,
-}: LoginPageProps) {
+export default function LoginPage({ onAuthenticated }: LoginPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,84 +30,85 @@ export default function LoginPage({
           "Account created. Check your email if confirmation is required.",
         );
       } else {
-        const user =
-            await authService.signIn(
-                email,
-                password,
-            );
+        const user = await authService.signIn(email, password);
 
-            onAuthenticated(user);
+        onAuthenticated(user);
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Authentication failed.",
-      );
+      setError(err instanceof Error ? err.message : "Authentication failed.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <main>
-      <h1>Work Hours Tracker</h1>
+    <main className="auth-page">
+      <section className="auth-card">
+        <h1 className="auth-brand">Work Hours Tracker</h1>
 
-      <h2>{isSignUp ? "Create account" : "Sign in"}</h2>
+        <h2>{isSignUp ? "Create account" : "Sign in"}</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            autoComplete="email"
-          />
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
 
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            minLength={6}
-            autoComplete={
-              isSignUp ? "new-password" : "current-password"
-            }
-          />
-        </div>
+          <div className="auth-field">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength={6}
+              autoComplete={isSignUp ? "new-password" : "current-password"}
+            />
+          </div>
 
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Please wait..."
-            : isSignUp
-              ? "Create account"
-              : "Sign in"}
+          <button className="auth-submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting
+              ? "Please wait..."
+              : isSignUp
+                ? "Create account"
+                : "Sign in"}
+          </button>
+        </form>
+
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        {message && (
+          <p className="auth-message" role="status">
+            {message}
+          </p>
+        )}
+
+        <button
+          className="auth-switch"
+          type="button"
+          onClick={() => {
+            setIsSignUp((current) => !current);
+            setError(null);
+            setMessage(null);
+          }}
+        >
+          {isSignUp
+            ? "Already have an account? Sign in"
+            : "Create a new account"}
         </button>
-      </form>
-
-      {error && <p role="alert">{error}</p>}
-
-      {message && <p role="status">{message}</p>}
-
-      <button
-        type="button"
-        onClick={() => {
-          setIsSignUp((current) => !current);
-          setError(null);
-          setMessage(null);
-        }}
-      >
-        {isSignUp
-          ? "Already have an account? Sign in"
-          : "Create a new account"}
-      </button>
+      </section>
     </main>
   );
 }

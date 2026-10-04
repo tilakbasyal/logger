@@ -639,3 +639,136 @@ select:disabled {
   border-top: 1px solid #eee;
   margin-top: 4px;
 }
+
+/* Authentication */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.auth-brand {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.auth-card h2 {
+  margin: 0 0 24px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.auth-field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: white;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.auth-field input:focus {
+  border-color: #222;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.auth-submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 10px;
+  background: #222;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-submit:hover {
+  background: #111;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  width: 100%;
+  margin-top: 20px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 14px;
+}
+
+.auth-switch:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+.auth-message,
+.auth-error {
+  margin: 16px 0 0;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.auth-error {
+  background: #fce8e8;
+  color: #a40000;
+}
+
+.auth-message {
+  background: #e8f5e9;
+  color: #176b2c;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 24px 20px;
+    border-radius: 14px;
+  }
+
+  .auth-brand {
+    font-size: 24px;
+  }
+}
