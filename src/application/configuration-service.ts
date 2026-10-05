@@ -30,22 +30,14 @@ export class ConfigurationService {
   async getEmployers(): Promise<Employer[]> {
     const employers = await this.employerRepository.getAll();
 
-    return employers.filter(
-      (employer) => employer.isActive,
-    );
+    return employers.filter((employer) => employer.isActive);
   }
 
-  async getLocationsForEmployer(
-    employerId: string,
-  ): Promise<WorkLocation[]> {
+  async getLocationsForEmployer(employerId: string): Promise<WorkLocation[]> {
     const locations =
-      await this.workLocationRepository.getByEmployer(
-        employerId,
-      );
+      await this.workLocationRepository.getByEmployer(employerId);
 
-    return locations.filter(
-      (location) => location.isActive,
-    );
+    return locations.filter((location) => location.isActive);
   }
 
   async addEmployer(name: string): Promise<void> {
@@ -62,30 +54,21 @@ export class ConfigurationService {
     await this.employerRepository.add(employer);
   }
 
-  async updateEmployer(
-    employer: Employer,
-  ): Promise<void> {
+  async updateEmployer(employer: Employer): Promise<void> {
     const updatedEmployer: Employer = {
       ...employer,
       name: employer.name.trim(),
       updatedAt: new Date().toISOString(),
     };
 
-    await this.employerRepository.update(
-      updatedEmployer,
-    );
+    await this.employerRepository.update(updatedEmployer);
   }
 
-  async deleteEmployer(
-    employerId: string,
-  ): Promise<void> {
+  async deleteEmployer(employerId: string): Promise<void> {
     await this.employerRepository.delete(employerId);
   }
 
-  async addLocation(
-    employerId: string,
-    name: string,
-  ): Promise<void> {
+  async addLocation(employerId: string, name: string): Promise<WorkLocation> {
     const now = new Date().toISOString();
 
     const location: WorkLocation = {
@@ -98,27 +81,20 @@ export class ConfigurationService {
     };
 
     await this.workLocationRepository.add(location);
+    return location;
   }
 
-  async updateLocation(
-    location: WorkLocation,
-  ): Promise<void> {
+  async updateLocation(location: WorkLocation): Promise<void> {
     const updatedLocation: WorkLocation = {
       ...location,
       name: location.name.trim(),
       updatedAt: new Date().toISOString(),
     };
 
-    await this.workLocationRepository.update(
-      updatedLocation,
-    );
+    await this.workLocationRepository.update(updatedLocation);
   }
 
-  async deleteLocation(
-    locationId: string,
-  ): Promise<void> {
-    await this.workLocationRepository.delete(
-      locationId,
-    );
+  async deleteLocation(locationId: string): Promise<void> {
+    await this.workLocationRepository.delete(locationId);
   }
 }

@@ -45,6 +45,7 @@ function formatDailyDate(value: string): string {
 }
 
 function PersonSection({ data }: { data: PersonDashboard }) {
+  const [showDailyDetails, setShowDailyDetails] = useState(false);
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   return (
     <section className="dashboard-person">
@@ -82,84 +83,6 @@ function PersonSection({ data }: { data: PersonDashboard }) {
         </div>
       )}
 
-      {/* Daily hours */}
-      {data.dailyMinutes.length > 0 && (
-        <section className="dashboard-daily">
-          <h3>Daily hours</h3>
-
-          <div className="daily-hours-list">
-            {data.dailyMinutes.map((day) => {
-              const isExpanded = expandedDate === day.date;
-
-              return (
-                <div className="daily-hours-day" key={day.date}>
-                  <button
-                    type="button"
-                    className="daily-hours-day-header"
-                    onClick={() =>
-                      setExpandedDate(isExpanded ? null : day.date)
-                    }
-                    aria-expanded={isExpanded}
-                  >
-                    <span>{formatDailyDate(day.date)}</span>
-
-                    <span className="daily-hours-day-total">
-                      <strong>{formatHours(day.minutes)}</strong>
-
-                      <span
-                        className="daily-hours-expand-icon"
-                        aria-hidden="true"
-                      >
-                        {isExpanded ? "−" : "+"}
-                      </span>
-                    </span>
-                  </button>
-
-                  <div className="daily-hours-employers">
-                    {day.employers.map((employer) => (
-                      <div
-                        className="daily-hours-employer"
-                        key={employer.employerId}
-                      >
-                        <span>{employer.employerName}</span>
-
-                        <span>{formatHours(employer.minutes)}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {isExpanded && (
-                    <div className="daily-hours-locations">
-                      {day.employers.map((employer) => (
-                        <div
-                          className="daily-hours-location-group"
-                          key={employer.employerId}
-                        >
-                          <div className="daily-hours-location-employer">
-                            {employer.employerName}
-                          </div>
-
-                          {employer.locations.map((location) => (
-                            <div
-                              className="daily-hours-location"
-                              key={location.locationId}
-                            >
-                              <span>{location.locationName}</span>
-
-                              <span>{formatHours(location.minutes)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* Calendar-month employer hours */}
       <div className="employer-list">
         {data.employerHours.map((employer) => (
@@ -182,6 +105,100 @@ function PersonSection({ data }: { data: PersonDashboard }) {
           </div>
         ))}
       </div>
+
+      {/* Daily hours */}
+      {data.dailyMinutes.length > 0 && (
+        <section className="dashboard-daily">
+          {showDailyDetails && (
+            <div className="daily-hours-list">
+              {data.dailyMinutes.map((day) => {
+                const isExpanded = expandedDate === day.date;
+
+                return (
+                  <div className="daily-hours-day" key={day.date}>
+                    <button
+                      type="button"
+                      className="daily-hours-day-header"
+                      onClick={() =>
+                        setExpandedDate(isExpanded ? null : day.date)
+                      }
+                      aria-expanded={isExpanded}
+                    >
+                      <span>{formatDailyDate(day.date)}</span>
+
+                      <span className="daily-hours-day-total">
+                        <strong>{formatHours(day.minutes)}</strong>
+
+                        <span
+                          className="daily-hours-expand-icon"
+                          aria-hidden="true"
+                        >
+                          {isExpanded ? "−" : "+"}
+                        </span>
+                      </span>
+                    </button>
+
+                    <div className="daily-hours-employers">
+                      {day.employers.map((employer) => (
+                        <div
+                          className="daily-hours-employer"
+                          key={employer.employerId}
+                        >
+                          <span>{employer.employerName}</span>
+
+                          <span>{formatHours(employer.minutes)}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {isExpanded && (
+                      <div className="daily-hours-locations">
+                        {day.employers.map((employer) => (
+                          <div
+                            className="daily-hours-location-group"
+                            key={employer.employerId}
+                          >
+                            <div className="daily-hours-location-employer">
+                              {employer.employerName}
+                            </div>
+
+                            {employer.locations.map((location) => (
+                              <div
+                                className="daily-hours-location"
+                                key={location.locationId}
+                              >
+                                <span>{location.locationName}</span>
+
+                                <span>{formatHours(location.minutes)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="dashboard-daily-toggle"
+            onClick={() => {
+              setShowDailyDetails((current) => !current);
+              setExpandedDate(null);
+            }}
+            aria-expanded={showDailyDetails}
+          >
+            <span>
+              {showDailyDetails ? "Hide daily details" : "View daily details"}
+            </span>
+
+            <span aria-hidden="true">{showDailyDetails ? "−" : "+"}</span>
+          </button>
+        </section>
+      )}
 
       {/* Payroll-period hours */}
       {data.payrollEmployerHours.length > 0 && (

@@ -17,6 +17,12 @@ function ConfigurationPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [addingLocationEmployerId, setAddingLocationEmployerId] = useState<
+    string | null
+  >(null);
+  const [openLocationFormEmployerId, setOpenLocationFormEmployerId] = useState<
+    string | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
 
   async function loadConfiguration() {
@@ -88,23 +94,30 @@ function ConfigurationPage() {
     }
 
     try {
-      setSaving(true);
+      setAddingLocationEmployerId(employerId);
       setError(null);
 
-      await configurationService.addLocation(employerId, name);
+      const newLocation = await configurationService.addLocation(
+        employerId,
+        name,
+      );
+
+      setLocations((current) => ({
+        ...current,
+        [employerId]: [...(current[employerId] ?? []), newLocation],
+      }));
 
       setLocationNames((current) => ({
         ...current,
         [employerId]: "",
       }));
-
-      await loadConfiguration();
+      setOpenLocationFormEmployerId(null);
     } catch (err) {
       console.error(err);
 
       setError(err instanceof Error ? err.message : "Failed to add location.");
     } finally {
-      setSaving(false);
+      setAddingLocationEmployerId(null);
     }
   }
 
@@ -152,35 +165,64 @@ function ConfigurationPage() {
                       )}
                     </div>
 
-                    <div className="add-location-form">
-                      <label htmlFor={`location-${employer.id}`}>
-                        Add location
-                      </label>
+                    <div className="add-location-action">
+                      <button
+                        className="add-location-trigger"
+                        type="button"
+                        onClick={() =>
+                          setOpenLocationFormEmployerId((current) =>
+                            current === employer.id ? null : employer.id,
+                          )
+                        }
+                        aria-expanded={
+                          openLocationFormEmployerId === employer.id
+                        }
+                      >
+                        {openLocationFormEmployerId === employer.id
+                          ? "− Cancel"
+                          : "+ Add location"}
+                      </button>
 
-                      <div className="configuration-input-row">
-                        <input
-                          id={`location-${employer.id}`}
-                          type="text"
-                          value={locationNames[employer.id] ?? ""}
-                          onChange={(event) =>
-                            setLocationNames((current) => ({
-                              ...current,
-                              [employer.id]: event.target.value,
-                            }))
-                          }
-                          placeholder="Enter location name"
-                          disabled={saving}
-                        />
+                      {openLocationFormEmployerId === employer.id && (
+                        <div className="add-location-form">
+                          <label htmlFor={`location-${employer.id}`}>
+                            Location name
+                          </label>
 
-                        <button
-                          className="configuration-button"
-                          type="button"
-                          onClick={() => void handleAddLocation(employer.id)}
-                          disabled={saving}
-                        >
-                          {saving ? "Adding..." : "Add location"}
-                        </button>
-                      </div>
+                          <div className="configuration-input-row">
+                            <input
+                              id={`location-${employer.id}`}
+                              type="text"
+                              value={locationNames[employer.id] ?? ""}
+                              onChange={(event) =>
+                                setLocationNames((current) => ({
+                                  ...current,
+                                  [employer.id]: event.target.value,
+                                }))
+                              }
+                              placeholder="Enter location name"
+                              disabled={
+                                addingLocationEmployerId === employer.id
+                              }
+                            />
+
+                            <button
+                              className="configuration-button"
+                              type="button"
+                              onClick={() =>
+                                void handleAddLocation(employer.id)
+                              }
+                              disabled={
+                                addingLocationEmployerId === employer.id
+                              }
+                            >
+                              {addingLocationEmployerId === employer.id
+                                ? "Adding..."
+                                : "Add location"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </article>
                 );

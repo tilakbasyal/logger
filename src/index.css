@@ -332,15 +332,6 @@ select:disabled {
   margin-bottom: 12px;
 }
 
-.dashboard-daily {
-  margin-bottom: 12px;
-}
-
-.dashboard-daily h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-
 .daily-hours-day {
   background: white;
   border-radius: 12px;
@@ -381,6 +372,27 @@ select:disabled {
 .dashboard-daily h3 {
   margin: 0 0 10px;
   font-size: 18px;
+}
+.dashboard-daily-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 12px 0;
+  margin-bottom: 12px;
+  border: none;
+  border-bottom: 1px solid #e5e5e5;
+  background: none;
+  color: #222;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dashboard-daily-toggle:hover {
+  color: #555;
 }
 
 .daily-hours-list {
@@ -1150,6 +1162,30 @@ select:disabled {
 .configuration-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.add-location-action {
+  margin-top: 16px;
+}
+
+.add-location-trigger {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #555;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.add-location-trigger:hover {
+  color: #222;
+  text-decoration: none;
+}
+
+.add-location-action .add-location-form {
+  margin-top: 14px;
 }
 
 .add-employer-card {
