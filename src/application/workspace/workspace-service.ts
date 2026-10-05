@@ -117,6 +117,38 @@ export class WorkspaceService {
 
     return data;
   }
+
+  async createInvitation(
+    personId: string,
+    invitedEmail: string,
+  ): Promise<string> {
+    const email = invitedEmail.trim();
+
+    if (!personId) {
+      throw new Error("Person is required.");
+    }
+
+    if (!email) {
+      throw new Error("Invitation email is required.");
+    }
+
+    const { data, error } = await supabase.rpc("create_workspace_invitation", {
+      target_person_id: personId,
+      invited_email: email,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error(
+        "Creating the invitation did not return an invitation token.",
+      );
+    }
+
+    return data;
+  }
 }
 
 export const workspaceService = new WorkspaceService();
