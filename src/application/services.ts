@@ -44,6 +44,7 @@ export const configurationService = new ConfigurationService(
   dashboardPersonRepository,
   dashboardEmployerRepository,
   dashboardWorkLocationRepository,
+  dashboardWorkPolicyRepository,
 );
 
 export const shiftHistoryService = new ShiftHistoryService(

@@ -1,10 +1,26 @@
 import { useEffect, useState } from "react";
 
+import type { Person } from "../domain/person/person";
+import type { WorkPolicy } from "../domain/work-policy/work-policy";
 import type { Employer } from "../domain/employer/employer";
 import type { WorkLocation } from "../domain/employer/work-location";
 import { configurationService } from "../application/services";
 
+function formatMonthlyLimit(maxMinutes: number): string {
+  const hours = maxMinutes / 60;
+
+  return `${Number.isInteger(hours) ? hours : hours.toFixed(1)} h / month`;
+}
+
 function ConfigurationPage() {
+  const [people, setPeople] = useState<Person[]>([]);
+  const [policies, setPolicies] = useState<WorkPolicy[]>([]);
+  const [personName, setPersonName] = useState("");
+  const [personMaxHours, setPersonMaxHours] = useState("");
+  const [savingPerson, setSavingPerson] = useState(false);
+  const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
+  const [editingPersonName, setEditingPersonName] = useState("");
+
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [locations, setLocations] = useState<Record<string, WorkLocation[]>>(
     {},
@@ -30,8 +46,14 @@ function ConfigurationPage() {
       setLoading(true);
       setError(null);
 
-      const employerData = await configurationService.getEmployers();
+      const [peopleData, policyData, employerData] = await Promise.all([
+        configurationService.getPeople(),
+        configurationService.getWorkPolicies(),
+        configurationService.getEmployers(),
+      ]);
 
+      setPeople(peopleData);
+      setPolicies(policyData);
       setEmployers(employerData);
 
       const locationEntries = await Promise.all(
@@ -58,6 +80,66 @@ function ConfigurationPage() {
   useEffect(() => {
     void loadConfiguration();
   }, []);
+
+  async function handleAddPerson() {
+    const trimmedName = personName.trim();
+
+    if (!trimmedName) {
+      setError("Please enter a person name.");
+      return;
+    }
+
+    const trimmedMaxHours = personMaxHours.trim();
+    const maxHours = trimmedMaxHours ? Number(trimmedMaxHours) : undefined;
+
+    if (maxHours !== undefined && !(maxHours > 0)) {
+      setError("Maximum hours per month must be a number greater than zero.");
+      return;
+    }
+
+    try {
+      setSavingPerson(true);
+      setError(null);
+
+      await configurationService.addPerson(trimmedName, maxHours);
+
+      setPersonName("");
+      setPersonMaxHours("");
+
+      await loadConfiguration();
+    } catch (err) {
+      console.error(err);
+
+      setError(err instanceof Error ? err.message : "Failed to add person.");
+    } finally {
+      setSavingPerson(false);
+    }
+  }
+
+  async function handleRenamePerson(person: Person) {
+    try {
+      setSavingPerson(true);
+      setError(null);
+
+      const updatedPerson = await configurationService.renamePerson(
+        person,
+        editingPersonName,
+      );
+
+      setPeople((current) =>
+        current.map((item) =>
+          item.id === updatedPerson.id ? updatedPerson : item,
+        ),
+      );
+      setEditingPersonId(null);
+    } catch (err) {
+      console.error(err);
+
+      setError(err instanceof Error ? err.message : "Failed to rename person.");
+    } finally {
+      setSavingPerson(false);
+    }
+  }
 
   async function handleAddEmployer() {
     const trimmedName = employerName.trim();
@@ -126,8 +208,143 @@ function ConfigurationPage() {
       <section className="configuration-content">
         <header className="configuration-header">
           <h1>Configuration</h1>
-          <p>Manage your employers and work locations.</p>
+          <p>Manage the people you track, employers and work locations.</p>
         </header>
+
+        <section className="configuration-section">
+          <h2>People</h2>
+
+          {loading ? (
+            <p className="configuration-muted">Loading people...</p>
+          ) : people.length === 0 ? (
+            <div className="configuration-empty">
+              <p>No people added yet.</p>
+            </div>
+          ) : (
+            <ul className="people-list">
+              {people.map((person) => {
+                const policy = policies
+                  .filter((item) => item.personId === person.id)
+                  .sort((a, b) =>
+                    b.effectiveFrom.localeCompare(a.effectiveFrom),
+                  )[0];
+
+                const isEditing = editingPersonId === person.id;
+
+                return (
+                  <li className="person-card" key={person.id}>
+                    {isEditing ? (
+                      <div className="configuration-input-row">
+                        <input
+                          type="text"
+                          value={editingPersonName}
+                          onChange={(event) =>
+                            setEditingPersonName(event.target.value)
+                          }
+                          aria-label={`New name for ${person.name}`}
+                          disabled={savingPerson}
+                          autoFocus
+                        />
+
+                        <button
+                          className="configuration-button"
+                          type="button"
+                          onClick={() => void handleRenamePerson(person)}
+                          disabled={savingPerson}
+                        >
+                          Save
+                        </button>
+
+                        <button
+                          className="add-location-trigger"
+                          type="button"
+                          onClick={() => setEditingPersonId(null)}
+                          disabled={savingPerson}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="person-card-details">
+                          <strong>{person.name}</strong>
+
+                          <span className="configuration-muted">
+                            {policy
+                              ? formatMonthlyLimit(policy.maxMinutes)
+                              : "No monthly limit"}
+                          </span>
+                        </div>
+
+                        <button
+                          className="add-location-trigger"
+                          type="button"
+                          onClick={() => {
+                            setEditingPersonId(person.id);
+                            setEditingPersonName(person.name);
+                          }}
+                        >
+                          Rename
+                        </button>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        <section className="add-employer-card">
+          <h2>Add person</h2>
+
+          <p>
+            Add someone else whose hours you want to track, like a partner or
+            family member.
+          </p>
+
+          <div className="add-employer-form">
+            <label htmlFor="person-name">Name</label>
+
+            <div className="configuration-input-row">
+              <input
+                id="person-name"
+                type="text"
+                value={personName}
+                onChange={(event) => setPersonName(event.target.value)}
+                placeholder="Enter name"
+                disabled={savingPerson}
+              />
+            </div>
+
+            <label htmlFor="person-max-hours">
+              Max hours per month (optional)
+            </label>
+
+            <div className="configuration-input-row">
+              <input
+                id="person-max-hours"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.5"
+                value={personMaxHours}
+                onChange={(event) => setPersonMaxHours(event.target.value)}
+                placeholder="e.g. 90"
+                disabled={savingPerson}
+              />
+
+              <button
+                className="configuration-button"
+                type="button"
+                onClick={() => void handleAddPerson()}
+                disabled={savingPerson}
+              >
+                {savingPerson ? "Adding..." : "Add person"}
+              </button>
+            </div>
+          </div>
+        </section>
 
         <section className="configuration-section">
           <h2>Employers</h2>
