@@ -93,6 +93,62 @@ export class WorkspaceService {
 
     return data?.workspace_id ?? null;
   }
+
+  async acceptInvitation(invitationToken: string): Promise<string> {
+    const token = invitationToken.trim();
+
+    if (!token) {
+      throw new Error("Invitation token is required.");
+    }
+
+    const { data, error } = await supabase.rpc("accept_workspace_invitation", {
+      invitation_token: token,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error(
+        "Accepting the invitation did not return a workspace ID.",
+      );
+    }
+
+    return data;
+  }
+
+  async createInvitation(
+    personId: string,
+    invitedEmail: string,
+  ): Promise<string> {
+    const email = invitedEmail.trim();
+
+    if (!personId) {
+      throw new Error("Person is required.");
+    }
+
+    if (!email) {
+      throw new Error("Invitation email is required.");
+    }
+
+    const { data, error } = await supabase.rpc("create_workspace_invitation", {
+      target_person_id: personId,
+      invited_email: email,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error(
+        "Creating the invitation did not return an invitation token.",
+      );
+    }
+
+    return data;
+  }
 }
 
 export const workspaceService = new WorkspaceService();

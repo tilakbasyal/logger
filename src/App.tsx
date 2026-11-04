@@ -27,7 +27,37 @@ function App() {
 
   const [hasWorkspace, setHasWorkspace] = useState(false);
 
+  const [invitationToken, setInvitationToken] = useState<string | null>(() =>
+    new URLSearchParams(window.location.search).get("invite"),
+  );
+
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+
+  const [invitationLoading, setInvitationLoading] = useState(false);
+
   async function loadWorkspaceStatus() {
+    setInvitationError(null);
+
+    if (invitationToken) {
+      try {
+        setInvitationLoading(true);
+
+        await workspaceService.acceptInvitation(invitationToken);
+
+        window.history.replaceState({}, "", window.location.pathname);
+
+        setInvitationToken(null);
+      } catch (err) {
+        setInvitationError(
+          err instanceof Error
+            ? err.message
+            : "Unable to accept the invitation.",
+        );
+      } finally {
+        setInvitationLoading(false);
+      }
+    }
+
     const workspaceExists = await workspaceService.hasWorkspace();
 
     setHasWorkspace(workspaceExists);
@@ -112,6 +142,25 @@ function App() {
       <LoginPage
         onAuthenticated={(authenticatedUser) => setUser(authenticatedUser)}
       />
+    );
+  }
+  if (invitationLoading) {
+    return <div>Accepting invitation...</div>;
+  }
+
+  if (invitationError) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card">
+          <h1 className="auth-brand">Work Hours Tracker</h1>
+
+          <h2>Invitation unavailable</h2>
+
+          <p className="auth-error" role="alert">
+            {invitationError}
+          </p>
+        </section>
+      </main>
     );
   }
 

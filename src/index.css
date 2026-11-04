@@ -1228,6 +1228,51 @@ select:disabled {
   color: #666;
 }
 
+.people-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.person-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.person-card > .configuration-input-row {
+  flex: 1;
+  align-items: center;
+}
+
+.person-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.person-card-details strong {
+  font-size: 18px;
+}
+
+.add-employer-form .configuration-input-row + label {
+  margin-top: 16px;
+}
+
+.add-employer-card + .configuration-section {
+  margin-top: 32px;
+}
+
 @media (max-width: 600px) {
   .configuration-page {
     padding: 24px 16px 40px;
